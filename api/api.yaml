@@ -1,0 +1,170 @@
+openapi: "3.0.0"
+
+info:
+  title: Dmetric
+  description: Application for device metrics monitoring
+  version: "0.0.1"
+  
+tags: 
+  - name: Health
+  - name: Devices
+  
+paths:
+  /health:
+    get:
+      tags: 
+        - Health
+      summary: Checks if the server is alive
+      responses: 
+        "204":
+          description: No content
+          content: 
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/HealthResponse"
+  
+  /api/v1/devices:
+    get:
+      tags:
+        - Devices
+      summary: Returns a list of devices and last updated time of each one
+      responses:
+        "200":
+          description: OK
+          content: 
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/Devices"
+    post:
+      tags:
+        - Devices
+      summary: Creates a new device and returns ID of
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Device"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Device"
+
+  /api/v1/devices/:id/metrics:
+    get:
+      tags:
+      - Devices
+      summary: Returns a list of metrics by device ID
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/Metrics"
+    post:
+      tags:
+      - Devices
+      summary: Creates a new metrics by device ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Metric"
+      responses:
+        "201":
+          description: Created
+          content: 
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/Metric"
+        
+    
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Server is up to running 
+    Devices:
+      type: array
+      items:
+        type: object
+        properties:
+          id: 
+            type: integer
+          name:
+            type: string
+          created_at:
+            type: string
+            description: time in format RFC3339
+          updated_at:
+            type: string
+            description: time in format RFC3339
+          temperature_enabled: 
+            type: boolean
+          noisiness_enabled:
+            type: boolean
+          humidity_enabled:
+            type: boolean
+      example:
+        - id: 3
+          name: dev_3
+          created_at: '2021-12-03'
+          updated_at: '2021-18-03'
+          temperature_enabled: true
+          noisiness_enabled: false
+          humidity_enabled: false
+        - id: 4
+          name: dev_4
+          created_at: '2021-12-03'
+          updated_at: '2021-19-03'
+          temperature_enabled: false
+          noisiness_enabled: true
+          humidity_enabled: true
+    Device:
+      type: object
+      properties:
+        name: 
+          type: string
+        temperature_enabled:
+          type: boolean
+        noisiness_enabled:
+          type: boolean
+        humidity_enabled:
+          type: boolean
+      example:
+          name : dev_2
+          temperature_enabled: fsalse
+          noisiness_enabled: false
+          humidity_enabled: false
+    Metrics:
+      type: array
+      items:
+        type: object
+        properties:
+          temperature:
+            type: integer
+          noisiness:
+            type: integer
+      example:
+        - temperature: 30
+          noisiness: 25
+        - temperature: 22
+          noisiness: 20
+    Metric:
+      type: object
+      properties:
+        temperature: 
+          type: integer
+          example: 23
+        noisiness:
+          type: integer
+          example: 45
+        

@@ -1,7 +1,15 @@
 const { Router } = require("express");
 const router = Router();
 
-const { serverCheck, deleteDeviceById, deleteMetricByDeviceId, getDevices, createDevice, getMetricsByDeviceId, createMetricsByDeviceId } = require("../controllers/index.controller");
+const { 
+    serverCheck, 
+    deleteDeviceById, 
+    deleteMetricByDeviceId, 
+    getDevices, 
+    createDevice, 
+    getMetricsByDeviceId, 
+    createMetricsByDeviceId 
+} = require("../controllers/index.controller");
 
 router.get("/health", serverCheck);
 router.delete("/api/v1/devices/:id", deleteDeviceById);

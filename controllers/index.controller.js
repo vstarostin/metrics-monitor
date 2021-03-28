@@ -13,7 +13,6 @@ const deleteDeviceById = async (req, res) => {
     } catch (error) {
         res.status(500).json({"msg": "internal error"})
     }
-
     res.json({"msg": "device successfully deleted"}) 
 };
 
@@ -28,27 +27,40 @@ const deleteMetricByDeviceId = async (req, res) =>{
 };
 
 const getDevices = async (req, res) => {
-    const devices = await pool.query(
-        "SELECT DISTINCT ON (id) devices.id, name, time, temp_enabled, humidity_enabled, noisiness_enabled FROM devices LEFT JOIN metrics ON devices.id=metrics.device_id ORDER BY id, time DESC"
+    let devices = await pool.query(
+        "SELECT DISTINCT ON (id) devices.id, name, created_at, metrics.time AS updated_at, temperature_enabled, humidity_enabled, noisiness_enabled FROM devices LEFT JOIN metrics ON devices.id=metrics.device_id ORDER BY id, time DESC"
     );
-    devices.rows.length > 0 ? res.json(devices.rows) : res.json({"msg": "do not have any device yet, please create"})
+    devices = devices.rows.map( device => {
+        let devKeys = Object.keys(device);
+        devKeys.map(i => {
+            if (device[i] == null) {
+                devKeys = devKeys.filter(j => j != i);
+            }
+        })
+        device = devKeys.reduce((acc, cur) => {
+            acc[cur] = device[cur];
+            return acc;
+        }, {});
+        return device;
+    })
+    devices.length > 0 ? res.status(200).json(devices) : res.status(404).json({"msg": "do not have any device yet, please create"})
 };
 
 const createDevice = async (req, res) => {
-    const deviceRequiredProps = ["temp_enabled", "noisiness_enabled", "humidity_enabled"];
+    const deviceRequiredProps = ["temperature_enabled", "noisiness_enabled", "humidity_enabled"];
     let reqBody = req.body;
     deviceRequiredProps.forEach(prop => {
         if (!Object.keys(reqBody).includes(prop)) {
             reqBody[prop] = true
         }
     });
-    let { name, temp_enabled, noisiness_enabled, humidity_enabled } = reqBody;
+    let { name, temperature_enabled, noisiness_enabled, humidity_enabled } = reqBody;
     const newDevice = await pool.query(
-        "INSERT INTO devices (name, temp_enabled, noisiness_enabled, humidity_enabled) VALUES($1, $2, $3, $4) RETURNING *", [
-            name, temp_enabled, noisiness_enabled, humidity_enabled
+        "INSERT INTO devices (name, temperature_enabled, noisiness_enabled, humidity_enabled) VALUES($1, $2, $3, $4) RETURNING *", [
+            name, temperature_enabled, noisiness_enabled, humidity_enabled
         ]
     );
-    res.status(201).json(newDevice.rows)
+    res.status(201).json(newDevice.rows[0])
 };
 
 const getMetricsByDeviceId = async (req, res) => {
@@ -59,14 +71,27 @@ const getMetricsByDeviceId = async (req, res) => {
         ]
     );
     if (device.rows.length > 0) {
-        const metrics = await pool.query(
-            "SELECT temp, noisiness, humidity, time FROM metrics WHERE device_id=$1", [
+        let metrics = await pool.query(
+            "SELECT temperature, noisiness, humidity, time FROM metrics WHERE device_id=$1", [
                 id
             ]
-        );  
-        metrics.rows.length > 0 ? res.json(metrics.rows) : res.json({"msg": "device has not metrics"});
+        );
+        metrics = metrics.rows.map(metric => {
+            let metricKeys = Object.keys(metric);
+            metricKeys.forEach(i => {
+                if (metric[i] == null) {
+                    metricKeys = metricKeys.filter(j => j != i);
+                }
+            })
+            metric = metricKeys.reduce((acc, cur) => {
+                acc[cur] = metric[cur];
+                return acc; 
+            }, {})
+            return metric;
+        });
+        Object.keys(metrics).length > 0 ? res.status(200).json(metrics) : res.status(404).json({"msg": "device has not metrics"});
     } else {
-        res.json({"msg": `device with id=${id} does not exist`});
+        res.status(400).json({"msg": `device with id=${id} does not exist`});
     }
 };
 
@@ -80,7 +105,7 @@ const createMetricsByDeviceId = async (req, res) => {
     );
     if (device.rows.length > 0) {
         let deviceParams = await pool.query(
-            "SELECT temp_enabled, noisiness_enabled, humidity_enabled FROM devices WHERE id = $1", [
+            "SELECT temperature_enabled, noisiness_enabled, humidity_enabled FROM devices WHERE id = $1", [
                 id
             ]
         );
@@ -97,15 +122,25 @@ const createMetricsByDeviceId = async (req, res) => {
             acc[cur[0]] = cur[1]
             return acc
         }, {});
-        let {temp, humidity, noisiness} = reqBody;
-        const newMetrics = await pool.query(
-            "INSERT INTO metrics (device_id, temp, humidity, noisiness) VALUES ($1, $2, $3, $4) RETURNING *", [
-                id, temp, humidity, noisiness
+        let {temperature, humidity, noisiness} = reqBody;
+        let newMetrics = await pool.query(
+            "INSERT INTO metrics (device_id, temperature, humidity, noisiness) VALUES ($1, $2, $3, $4) RETURNING *", [
+                id, temperature, humidity, noisiness
             ]
-        )
-        res.json(newMetrics.rows) 
+        );
+        newMetricsKeys = Object.keys(newMetrics.rows[0]);
+        newMetricsKeys.map(i => {
+            if (newMetrics.rows[0][i] == null) {
+                newMetricsKeys = newMetricsKeys.filter(j => j != i)
+            }
+        })
+        newMetrics = newMetricsKeys.reduce((acc, cur) => {
+            acc[cur] = newMetrics.rows[0][cur];
+            return acc;
+        }, {})
+        res.status(201).json(newMetrics) 
     } else {
-        res.json({"msg": `device with id=${id} does not exist`})
+        res.status(400).json({"msg": `device with id=${id} does not exist`})
     }   
 };
 
