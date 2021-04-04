@@ -18,10 +18,6 @@ paths:
       responses: 
         "204":
           description: No content
-          content: 
-            application/json:
-              schema: 
-                $ref: "#/components/schemas/HealthResponse"
   
   /api/v1/devices:
     get:
@@ -44,7 +40,17 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Device"
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: dev_2
+                temperature_enabled:
+                  type: boolean
+                  example: false
+                noisiness_enabled:
+                  type: boolean
+                  example: false
       responses:
         "201":
           description: Created
@@ -68,13 +74,20 @@ paths:
     post:
       tags:
       - Devices
-      summary: Creates a new metrics by device ID
+      summary: Devices should send metrics on this endpoint
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Metric"
+              type: object
+              properties: 
+                temperature:
+                  type: integer
+                  example: 23
+                noisiness:
+                  type: integer
+                  example: 45         
       responses:
         "201":
           description: Created
@@ -86,12 +99,6 @@ paths:
     
 components:
   schemas:
-    HealthResponse:
-      type: object
-      properties:
-        message:
-          type: string
-          example: Server is up to running 
     Devices:
       type: array
       items:
@@ -124,13 +131,14 @@ components:
         - id: 4
           name: dev_4
           created_at: '2021-12-03'
-          updated_at: '2021-19-03'
           temperature_enabled: false
           noisiness_enabled: true
           humidity_enabled: true
     Device:
       type: object
       properties:
+        id:
+          type: integer
         name: 
           type: string
         temperature_enabled:
@@ -139,11 +147,16 @@ components:
           type: boolean
         humidity_enabled:
           type: boolean
+        created_at:
+          type: string
+          description: time in format RFC3339
       example:
+          id: 2
           name : dev_2
-          temperature_enabled: fsalse
+          temperature_enabled: false
           noisiness_enabled: false
-          humidity_enabled: false
+          humidity_enabled: true
+          created_at: "2021-03-31T10:43:59.444Z"
     Metrics:
       type: array
       items:
@@ -153,18 +166,39 @@ components:
             type: integer
           noisiness:
             type: integer
+          time:
+            type: string
+            description: time in format RFC3339
       example:
         - temperature: 30
           noisiness: 25
+          time: "2021-03-28T16:05:47.706Z"
         - temperature: 22
           noisiness: 20
+          time: "2021-03-28T16:10:52.339Z"
     Metric:
       type: object
       properties:
+        id: 
+          type: integer
+          # example: 4
+        device_id: 
+          type: integer
+          # example: 2
+        time: 
+          type: string
+          description: time in format RFC3339
+          # example: "2021-03-31T11:01:42.608Z"
         temperature: 
           type: integer
-          example: 23
+          # example: 23
         noisiness:
           type: integer
-          example: 45
+          # example: 45
+      example:
+        id: 4
+        device_id: 2
+        temperature: 23
+        noisiness: 45
+        time: "2021-03-31T11:01:42.608Z"
         
