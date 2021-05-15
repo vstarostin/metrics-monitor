@@ -15,7 +15,7 @@ Specification are described in OpenAPI format, reference
 https://github.com/vstarostin/metrics-monitor/blob/main/api/api.yaml
 
 ### Run app <br />
----
+<hr>
 
 For build web-server and client require install Docker and docker-compose
 
