@@ -11,7 +11,7 @@ Web-server gives REST API for devices control
 
 ## API
 
-Specification are described in OpenAPI format, reference 
+Specification are described in OpenAPI format, reference <br />
 https://github.com/vstarostin/metrics-monitor/blob/main/api/api.yaml
 
 ### Run app
