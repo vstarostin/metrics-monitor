@@ -9,10 +9,18 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: monitor
     volumes:
-      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./server/db/init.sql:/docker-entrypoint-initdb.d/init.sql
 
   server:
-    build: .
+    build: ./server
     container_name: express-server
     ports:
       - 8000:8000
+
+  # client:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile.prod
+  #     container_name: react:prod
+  #     ports: 
+  #       - 3000:80

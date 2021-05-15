@@ -16,5 +16,14 @@ CREATE TABLE metrics(
     time TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+CREATE TABLE users(
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL
+);
+
+INSERT INTO users (name, password, email) VALUES ('John', '123', 'J@j.com');
+
 
 
