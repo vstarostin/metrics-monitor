@@ -1,5 +1,5 @@
 # POC System for IOT devices monitoring
-----
+
 ## Implementation of system for monitoring and collecting metrics of devices that receive data such as temperature, noisiness and humidity.
 ----
 
@@ -13,11 +13,12 @@ Web-server gives REST API for devices control
 
 Specification are described in OpenAPI format, reference 
 
-### Run app
+### Run app <br />
+---
 
 For build web-server and client require install Docker and docker-compose
 
-Command builds server and client and launches them
+Command builds server and client and starting them
 
 ```sh
 docker-compose up 
