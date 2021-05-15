@@ -1,6 +1,4 @@
 # POC System for IOT devices monitoring
-====
-## Реализация системы для мониторинга и сбора метрик устройств собирающих данные о температуре, влажности и шуме.
 ----
 ## Implementation of system for monitoring and collecting metrics of devices that receive data such as temperature, noisiness and humidity.
 ----
